@@ -27,7 +27,7 @@ namespace Swashbuckle.Swagger.FromUriParams
             }
         }
 
-        private void HandleFromUriObjectParams(Operation operation, SchemaRegistry schemaRegistry, ApiDescription apiDescription)
+        protected virtual void HandleFromUriObjectParams(Operation operation, SchemaRegistry schemaRegistry, ApiDescription apiDescription)
         {
             var fromUriObjectParams = operation.parameters
                 .Where(param => param.@in == "query" && param.type == null)
@@ -48,7 +48,7 @@ namespace Swashbuckle.Swagger.FromUriParams
             }
         }
 
-        private void ExtractAndAddQueryParams(
+        protected virtual void ExtractAndAddQueryParams(
             Schema sourceSchema,
             string sourceQualifier,
             bool? sourceRequired,
