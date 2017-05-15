@@ -138,6 +138,19 @@ namespace Swashbuckle.Swagger
 
             if (type.IsEnum)
                 return CreateEnumSchema(primitiveContract, type);
+            return MapType(type);
+        }
+
+        public Schema MapType(Type type)
+        { 
+            if (type.IsGenericType)
+            {
+                type = type.GenericTypeArguments[0];
+            }
+            else if (type.IsArray)
+            {
+                type = type.GetElementType();
+            }
 
             switch (type.FullName)
             {
@@ -238,6 +251,8 @@ namespace Swashbuckle.Swagger
             var properties = jsonContract.Properties
                 .Where(p => !p.Ignored)
                 .Where(p => !(_ignoreObsoleteProperties && p.IsObsolete()))
+                .GroupBy(prop => prop.PropertyName)
+                .Select(prop => prop.FirstOrDefault())
                 .ToDictionary(
                     prop => prop.PropertyName,
                     prop => CreateInlineSchema(prop.PropertyType).WithValidationProperties(prop)

@@ -60,7 +60,8 @@ namespace Swashbuckle.Application
 
             SchemaFilter<ApplySwaggerSchemaFilterAttributes>();
 
-            OperationFilter<HandleFromUriParams>();
+            //OperationFilter<HandleFromUriParams>();
+            OperationFilter<HandleUniversalModelParams>();
             OperationFilter<ApplySwaggerOperationAttributes>();
             OperationFilter<ApplySwaggerResponseAttributes>();
             OperationFilter<ApplySwaggerOperationFilterAttributes>();
