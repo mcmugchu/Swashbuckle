@@ -1,8 +1,8 @@
-:heavy_exclamation_mark::heavy_exclamation_mark::heavy_exclamation_mark: The source code for Swashbuckle 6.0 currently resides at https://github.com/domaindrivendev/Ahoy|
---------------
-This new version targets ASP.NET Core (RC2 and beyond) and, like the new .NET framework, was built from the ground up - hence the separate repository. It's currently in beta and once it reaches a stable release milestone, I plan to merge it back on top of this codebase. In the meantime, if you have issues related to 6.0.0, please create them at the other repo.|
+| :mega: Calling for Maintainers |
+|--------------|
+| With the introduction of [ASP.NET Core](https://www.asp.net/core), I've now shifted my focus to the Core-specific project - [Swashbuckle.AspNetCore](https://github.com/domaindrivendev/Swashbuckle.AspNetCore). That will be receiving most of my (already limited) personal time, and so I won't have the capacity to maintain this one at a sufficient rate. Still, I'd love to see it live on and am seeking one or two "core" contributors / maintainers to help out. Ideally, these would be people who have already contributed through PRs and understand the inner workings and overall design. Once signed-up, we can agree on an approach that works - ultimately, I want to remove myself as the bottleneck to merging PRs and getting fresh Nugets published. If you're interested, please let me know by adding a comment [here](https://github.com/domaindrivendev/Swashbuckle/issues/1053) |
 
-Swashbuckle 5.0
+Swashbuckle
 =========
 
 Seamlessly adds a [Swagger](http://swagger.io/) to WebApi projects! Combines ApiExplorer and Swagger/swagger-ui to provide a rich discovery, documentation and playground experience to your API consumers.
@@ -477,7 +477,7 @@ This version of Swashbuckle makes the transition to Swagger 2.0. The 2.0 specifi
 If you're using the existing configuration API to customize the final Swagger document and/or swagger-ui, you will need to port the code manually. The static __Customize__ methods on SwaggerSpecConfig and SwaggerUiConfig have been replaced with extension methods on HttpConfiguration - __EnableSwagger__ and __EnableSwaggerUi__. All options from version 4.0 are made available through these methods, albeit with slightly different naming and syntax. Refer to the tables below for a summary of changes:
 
 
-| 4.0 | 5.0 Equivalant | Additional Notes |
+| 4.0 | 5.0 Equivalent | Additional Notes |
 | --------------- | --------------- | ---------------- |
 | ResolveBasePathUsing | RootUrl | |
 | ResolveTargetVersionUsing | N/A | version is now implicit in the docs URL e.g. "swagger/docs/{apiVersion}" |
@@ -503,6 +503,8 @@ If you're using the existing configuration API to customize the final Swagger do
 5. [How to add vendor extensions](#how-to-add-vendor-extensions)
 6. [FromUri Query string DataMember names are incorrect](#fromuri-query-string-datamember-names-are-incorrect)
 7. [Remove Duplicate Path Parameters](#remove-duplicate-path-parameters)
+8. [Deploying behind Load Balancer / Reverse Proxies](#deploying-behind-load-balancer--reverse-proxies)
+9. [500 : {"Message":"An error has occurred."}](#500--messagean-error-has-occurred)
 
 ### Swagger-ui showing "Can't read swagger JSON from ..."
 
@@ -555,9 +557,9 @@ When you host Web API 2 on top of OWIN/SystemWeb, Swashbuckle cannot correctly r
 You must either explicitly set VirtualPathRoot in your HttpConfiguration at startup, or perform customization like this to fix automatic discovery:
 
 ```csharp
-SwaggerSpecConfig.Customize(c =>
+httpConfiguration.EnableSwagger(c => 
 {
-    c.ResolveBasePathUsing(req =>
+    c.RootUrl(req =>
         req.RequestUri.GetLeftPart(UriPartial.Authority) +
         req.GetRequestContext().VirtualPathRoot.TrimEnd('/'));
 }
@@ -653,3 +655,11 @@ public class ComplexTypeOperationFilter : IOperationFilter
     }
 }
 ```
+
+### Deploying behind Load Balancer / Reverse Proxies
+
+Swashbuckle attempts to populate the [Swagger "host"](http://swagger.io/specification/#swaggerObject) property from HTTP headers that are sent with the request for Swagger JSON. This may cause issues in load balancer / reverse proxy environments, particularly if non-standard headers are used to pass on the outer most host name. You can workaround this by providing your own function for determining your API's root URL based on vendor-specific headers. Checkout [issue 705](https://github.com/domaindrivendev/Swashbuckle/issues/705) for some potential implementations.
+
+### 500 : {"Message":"An error has occurred."}
+
+If, on loading the Swagger UI page, you get an error: `500 : {"Message":"An error has occurred."} http://<url>/swagger/docs/v1` ensure that the XML documentation output settings have been set in the project file in the solution, for both Debug and Release configurations.
